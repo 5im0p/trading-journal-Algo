@@ -51,12 +51,12 @@ export default function App() {
           <div className="w-px h-5 bg-[#1c1c24]" />
 
           {/* Navigation — style underline */}
-          <nav className="flex gap-0">
+          <nav className="flex gap-2">
             {tabs.map(({ id, label, Icon }) => (
               <button
                 key={id}
                 onClick={() => setTab(id)}
-                className={`relative flex items-center gap-2 px-5 h-14 text-xs font-semibold tracking-widest transition-colors cursor-pointer ${
+                className={`relative flex items-center gap-2 px-8 h-14 text-xs font-semibold tracking-widest transition-colors cursor-pointer ${
                   tab === id ? 'text-white' : 'text-[#4a4a58] hover:text-[#9a9aaa]'
                 }`}
               >
@@ -64,7 +64,7 @@ export default function App() {
                 {label}
                 {/* Underline indicator */}
                 {tab === id && (
-                  <span className="absolute bottom-0 left-4 right-4 h-[2px] bg-[#00d97e] rounded-t-full" />
+                  <span className="absolute bottom-0 left-6 right-6 h-[2px] bg-[#00d97e] rounded-t-full" />
                 )}
               </button>
             ))}

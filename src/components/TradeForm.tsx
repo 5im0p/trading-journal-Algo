@@ -1,8 +1,8 @@
-import { useState, useRef, type RefObject } from 'react'
+import { useState } from 'react'
 import type { Trade, Strategy, Direction, TradeResult, TradeNumber } from '../types'
 import { createTrade } from '../store'
 import { toBase64 } from '../utils'
-import { Upload, X, TrendingUp, TrendingDown, ClipboardPaste } from 'lucide-react'
+import { X, TrendingUp, TrendingDown, ClipboardPaste } from 'lucide-react'
 
 interface Props {
   trades: Trade[]
@@ -22,17 +22,9 @@ export default function TradeForm({ trades, strategies, editTrade, onSave, onCan
   const [result, setResult] = useState<TradeResult | undefined>(editTrade?.result)
   const [entryScreenshot, setEntryScreenshot] = useState<string | undefined>(editTrade?.entryScreenshot)
   const [referenceScreenshot, setReferenceScreenshot] = useState<string | undefined>(editTrade?.referenceScreenshot)
-  const entryRef = useRef<HTMLInputElement>(null)
-  const refRef = useRef<HTMLInputElement>(null)
-
   const tradesOnDate = trades.filter(t => t.date === date && t.id !== editTrade?.id)
   const usedNumbers = tradesOnDate.map(t => t.tradeNumber)
   const canAdd = usedNumbers.length < 2 || !!editTrade
-
-  async function handleImage(file: File, setter: (s: string) => void) {
-    const b64 = await toBase64(file)
-    setter(b64)
-  }
 
   async function handlePaste(e: React.ClipboardEvent, setter: (s: string) => void) {
     const items = Array.from(e.clipboardData.items)
@@ -151,16 +143,12 @@ export default function TradeForm({ trades, strategies, editTrade, onSave, onCan
         <ImageUpload
           label="Screenshot d'entrée"
           value={entryScreenshot}
-          inputRef={entryRef}
-          onChange={f => handleImage(f, setEntryScreenshot)}
           onClear={() => setEntryScreenshot(undefined)}
           onPaste={e => handlePaste(e, setEntryScreenshot)}
         />
         <ImageUpload
           label="Screenshot de référence"
           value={referenceScreenshot}
-          inputRef={refRef}
-          onChange={f => handleImage(f, setReferenceScreenshot)}
           onClear={() => setReferenceScreenshot(undefined)}
           onPaste={e => handlePaste(e, setReferenceScreenshot)}
         />
@@ -180,11 +168,9 @@ export default function TradeForm({ trades, strategies, editTrade, onSave, onCan
   )
 }
 
-function ImageUpload({ label, value, inputRef, onChange, onClear, onPaste }: {
+function ImageUpload({ label, value, onClear, onPaste }: {
   label: string
   value?: string
-  inputRef: RefObject<HTMLInputElement | null>
-  onChange: (f: File) => void
   onClear: () => void
   onPaste: (e: React.ClipboardEvent) => void
 }) {
@@ -203,19 +189,13 @@ function ImageUpload({ label, value, inputRef, onChange, onClear, onPaste }: {
         <div
           onPaste={onPaste}
           tabIndex={0}
-          className="w-full border border-dashed border-[#3a3a3a] rounded-lg aspect-video flex flex-col items-center justify-center gap-2 hover:border-[#555] focus:border-[#22c55e] transition-colors focus:outline-none cursor-pointer"
-          onClick={() => inputRef.current?.click()}
+          className="w-full border border-dashed border-[#3a3a3a] rounded-lg aspect-video flex flex-col items-center justify-center gap-2 hover:border-[#22c55e]/50 focus:border-[#22c55e] transition-colors focus:outline-none cursor-default select-none"
         >
-          <Upload size={20} className="text-gray-500" />
-          <span className="text-sm text-gray-500">Cliquer ou glisser une image</span>
-          <span className="flex items-center gap-1.5 text-xs text-gray-600 bg-[#2a2a2a] px-2.5 py-1 rounded-full">
-            <ClipboardPaste size={11} />
-            Ctrl+V pour coller depuis TradingView
-          </span>
+          <ClipboardPaste size={22} className="text-gray-500" />
+          <span className="text-sm text-gray-400 font-medium">Cliquer ici puis Ctrl+V</span>
+          <span className="text-xs text-gray-600">Coller directement depuis TradingView</span>
         </div>
       )}
-      <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
-        onChange={e => e.target.files?.[0] && onChange(e.target.files[0])} />
     </div>
   )
 }

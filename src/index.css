@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -11,8 +13,8 @@ html {
 }
 
 body {
-  background-color: #1a1a1a;
-  color: #e5e5e5;
+  background-color: #0b0b0f;
+  color: #d1d1d6;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   font-size: 1rem;
@@ -23,7 +25,30 @@ body {
   min-height: 100vh;
 }
 
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #1a1a1a; }
-::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #555; }
+/* Monospace pour données numériques */
+.mono {
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a48; }
+
+/* Select dark */
+select option {
+  background: #111116;
+  color: #d1d1d6;
+}
+
+/* Glow vert */
+.glow-green {
+  text-shadow: 0 0 12px rgba(0, 217, 126, 0.6);
+}
+
+/* Input date/time dark */
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}

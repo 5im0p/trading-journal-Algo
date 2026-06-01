@@ -20,14 +20,7 @@ export default function StrategyManager({ strategies, onUpdate }: Props) {
     setNewName('')
   }
 
-  function deleteStrategy(id: string) {
-    onUpdate(strategies.filter(s => s.id !== id))
-  }
-
-  function startEdit(s: Strategy) {
-    setEditId(s.id)
-    setEditName(s.name)
-  }
+  function startEdit(s: Strategy) { setEditId(s.id); setEditName(s.name) }
 
   function saveEdit() {
     const name = editName.trim()
@@ -36,38 +29,48 @@ export default function StrategyManager({ strategies, onUpdate }: Props) {
     setEditId(null)
   }
 
+  const inputClass = "flex-1 bg-[#0b0b0f] border border-[#1c1c24] rounded px-3.5 py-2.5 text-sm text-[#d1d1d6] focus:outline-none focus:border-[#00d97e]/50 transition-colors placeholder:text-[#2a2a35]"
+
   return (
     <div className="space-y-4">
-      <h3 className="text-base font-semibold text-white">Gestion des stratégies</h3>
-      <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <div className="w-1 h-4 bg-[#00d97e] rounded-full" />
+        <h3 className="text-xs font-semibold text-[#3a3a48] tracking-widest uppercase">Stratégies</h3>
+      </div>
+
+      <div className="space-y-1.5">
         {strategies.map(s => (
-          <div key={s.id} className="flex items-center gap-3 bg-[#1e1e1e] rounded-lg px-4 py-2.5 border border-[#3a3a3a]">
+          <div key={s.id}
+            className="flex items-center gap-3 bg-[#0b0b0f] border border-[#1c1c24] rounded px-4 py-2.5 hover:border-[#2a2a35] transition-colors group">
             {editId === s.id ? (
               <>
                 <input value={editName} onChange={e => setEditName(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditId(null) }}
                   className="flex-1 bg-transparent text-sm text-white focus:outline-none" autoFocus />
-                <button onClick={saveEdit} className="text-[#22c55e] hover:text-green-300 cursor-pointer p-0.5"><Check size={15} /></button>
-                <button onClick={() => setEditId(null)} className="text-gray-500 hover:text-gray-300 cursor-pointer p-0.5"><X size={15} /></button>
+                <button onClick={saveEdit} className="text-[#00d97e] hover:text-green-300 cursor-pointer p-0.5"><Check size={14} /></button>
+                <button onClick={() => setEditId(null)} className="text-[#3a3a48] hover:text-[#9a9aaa] cursor-pointer p-0.5"><X size={14} /></button>
               </>
             ) : (
               <>
-                <span className="flex-1 text-sm text-gray-200">{s.name}</span>
-                <button onClick={() => startEdit(s)} className="text-gray-500 hover:text-gray-300 cursor-pointer p-0.5"><Pencil size={14} /></button>
-                <button onClick={() => deleteStrategy(s.id)} className="text-gray-500 hover:text-red-400 cursor-pointer p-0.5"><Trash2 size={14} /></button>
+                <span className="flex-1 text-sm text-[#9a9aaa]">{s.name}</span>
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => startEdit(s)} className="text-[#3a3a48] hover:text-[#9a9aaa] cursor-pointer p-0.5"><Pencil size={12} /></button>
+                  <button onClick={() => onUpdate(strategies.filter(x => x.id !== s.id))} className="text-[#3a3a48] hover:text-[#ff4d4d] cursor-pointer p-0.5"><Trash2 size={12} /></button>
+                </div>
               </>
             )}
           </div>
         ))}
       </div>
+
       <div className="flex gap-2">
         <input value={newName} onChange={e => setNewName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && addStrategy()}
           placeholder="Nouvelle stratégie..."
-          className="flex-1 bg-[#1e1e1e] border border-[#3a3a3a] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#22c55e] placeholder:text-gray-600" />
+          className={inputClass} />
         <button onClick={addStrategy}
-          className="px-4 py-2.5 bg-[#22c55e]/10 border border-[#22c55e]/30 rounded-lg text-[#22c55e] hover:bg-[#22c55e]/20 transition-colors cursor-pointer">
-          <Plus size={17} />
+          className="px-4 py-2.5 rounded border border-[#00d97e]/30 text-[#00d97e] hover:bg-[#00d97e]/8 hover:border-[#00d97e]/50 transition-colors cursor-pointer">
+          <Plus size={15} />
         </button>
       </div>
     </div>

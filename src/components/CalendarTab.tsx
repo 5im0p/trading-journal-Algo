@@ -1,74 +1,84 @@
 import { useState } from 'react'
 import type { Trade, Strategy } from '../types'
 import { getDayColor } from '../utils'
-import { ChevronLeft, ChevronRight, Calendar, X, ZoomIn, ZoomOut } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from 'lucide-react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
-interface Props {
-  trades: Trade[]
-  strategies: Strategy[]
-}
+interface Props { trades: Trade[]; strategies: Strategy[] }
 
-const DAY_NAMES = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+const DAY_NAMES = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM']
 
 export default function CalendarTab({ trades, strategies }: Props) {
   const [current, setCurrent] = useState(new Date())
   const [modal, setModal] = useState<{ src: string; trade: Trade } | null>(null)
   const [zoom, setZoom] = useState(1)
 
-  const monthStart = startOfMonth(current)
-  const monthEnd = endOfMonth(current)
-  const days = eachDayOfInterval({ start: monthStart, end: monthEnd })
-  const firstDow = (getDay(monthStart) + 6) % 7
-  const paddingDays = Array(firstDow).fill(null)
-
-  function openModal(src: string, trade: Trade) {
-    setModal({ src, trade })
-    setZoom(1)
-  }
-
+  const days = eachDayOfInterval({ start: startOfMonth(current), end: endOfMonth(current) })
+  const firstDow = (getDay(startOfMonth(current)) + 6) % 7
   const today = format(new Date(), 'yyyy-MM-dd')
-  const monthTrades = trades.filter(t => t.date.startsWith(format(current, 'yyyy-MM')))
+  const monthKey = format(current, 'yyyy-MM')
+  const monthTrades = trades.filter(t => t.date.startsWith(monthKey))
+  const monthWins = monthTrades.filter(t => t.result === 'WIN').length
+  const monthLosses = monthTrades.filter(t => t.result === 'LOSS').length
 
   return (
     <div className="space-y-5">
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-white capitalize">
-            {format(current, 'MMMM yyyy', { locale: fr })}
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            {monthTrades.length} trade{monthTrades.length !== 1 ? 's' : ''} ce mois
-          </p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs text-[#3a3a48] mono tracking-widest uppercase">Journal</span>
+            <span className="text-[#1c1c24]">/</span>
+            <span className="text-xs text-[#00d97e] mono tracking-widest uppercase">Calendrier</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-semibold text-white capitalize">
+              {format(current, 'MMMM yyyy', { locale: fr })}
+            </h2>
+            <div className="flex items-center gap-3 text-sm">
+              <span className="mono text-[#00d97e] font-semibold">{monthWins}W</span>
+              <span className="text-[#1c1c24]">/</span>
+              <span className="mono text-[#ff4d4d] font-semibold">{monthLosses}L</span>
+              {monthTrades.filter(t=>t.result).length > 0 && (
+                <>
+                  <span className="text-[#1c1c24]">/</span>
+                  <span className={`mono font-semibold ${monthWins >= monthLosses ? 'text-[#00d97e]' : 'text-[#ff4d4d]'}`}>
+                    {((monthWins / monthTrades.filter(t=>t.result).length) * 100).toFixed(0)}%
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-1.5">
           <button onClick={() => setCurrent(new Date())}
-            className="text-sm px-4 py-2 rounded-lg border border-[#3a3a3a] text-gray-400 hover:text-white hover:bg-[#2a2a2a] transition-colors cursor-pointer flex items-center gap-2">
-            <Calendar size={14} /> Aujourd'hui
+            className="px-3 py-2 text-xs mono tracking-widest text-[#4a4a58] border border-[#1c1c24] rounded hover:border-[#2a2a35] hover:text-[#9a9aaa] transition-colors cursor-pointer">
+            TODAY
           </button>
           <button onClick={() => setCurrent(d => new Date(d.getFullYear(), d.getMonth() - 1))}
-            className="w-9 h-9 flex items-center justify-center rounded-lg border border-[#3a3a3a] text-gray-400 hover:text-white hover:bg-[#2a2a2a] transition-colors cursor-pointer">
-            <ChevronLeft size={17} />
+            className="w-9 h-9 flex items-center justify-center rounded border border-[#1c1c24] text-[#4a4a58] hover:border-[#2a2a35] hover:text-[#9a9aaa] transition-colors cursor-pointer">
+            <ChevronLeft size={15} />
           </button>
           <button onClick={() => setCurrent(d => new Date(d.getFullYear(), d.getMonth() + 1))}
-            className="w-9 h-9 flex items-center justify-center rounded-lg border border-[#3a3a3a] text-gray-400 hover:text-white hover:bg-[#2a2a2a] transition-colors cursor-pointer">
-            <ChevronRight size={17} />
+            className="w-9 h-9 flex items-center justify-center rounded border border-[#1c1c24] text-[#4a4a58] hover:border-[#2a2a35] hover:text-[#9a9aaa] transition-colors cursor-pointer">
+            <ChevronRight size={15} />
           </button>
         </div>
       </div>
 
-      {/* Day name headers */}
-      <div className="grid grid-cols-7 gap-1.5">
+      {/* Day headers */}
+      <div className="grid grid-cols-7 gap-1">
         {DAY_NAMES.map(d => (
-          <div key={d} className="text-center text-sm font-medium text-gray-500 py-1">{d}</div>
+          <div key={d} className="text-center mono text-xs text-[#2a2a35] tracking-widest py-2">{d}</div>
         ))}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-7 gap-1.5">
-        {paddingDays.map((_, i) => <div key={`pad-${i}`} />)}
+      {/* Calendar grid */}
+      <div className="grid grid-cols-7 gap-1">
+        {Array(firstDow).fill(null).map((_, i) => <div key={`p${i}`} />)}
         {days.map(day => {
           const dateStr = format(day, 'yyyy-MM-dd')
           const dayTrades = trades.filter(t => t.date === dateStr)
@@ -77,32 +87,22 @@ export default function CalendarTab({ trades, strategies }: Props) {
           const color = getDayColor(dayTrades)
           const isToday = dateStr === today
 
-          const borderColor = color === 'green' ? 'border-[#22c55e]/40' :
-            color === 'orange' ? 'border-[#f59e0b]/40' :
-            color === 'red' ? 'border-[#ef4444]/40' :
-            isToday ? 'border-[#555]' : 'border-[#2a2a2a]'
-
-          const bgColor = color === 'green' ? 'bg-[#22c55e]/8' :
-            color === 'orange' ? 'bg-[#f59e0b]/8' :
-            color === 'red' ? 'bg-[#ef4444]/8' : 'bg-[#1e1e1e]'
+          const borderStyle =
+            color === 'green'  ? 'border-[#00d97e]/30 bg-[#00d97e]/4'  :
+            color === 'orange' ? 'border-[#f59e0b]/30 bg-[#f59e0b]/4'  :
+            color === 'red'    ? 'border-[#ff4d4d]/30 bg-[#ff4d4d]/4'  :
+            isToday            ? 'border-[#2a2a35] bg-[#0f0f14]'       :
+                                 'border-[#1c1c24] bg-[#0d0d12]'
 
           return (
             <div key={dateStr}
-              className={`rounded-lg border ${borderColor} ${bgColor} p-2 min-h-24 flex flex-col ${isToday ? 'ring-1 ring-[#444]' : ''}`}>
-              <div className={`text-sm font-medium mb-2 ${isToday ? 'text-white font-bold' : 'text-gray-400'}`}>
+              className={`border rounded-lg p-1.5 min-h-[90px] flex flex-col transition-colors ${borderStyle} ${isToday ? 'ring-1 ring-[#2a2a35]' : ''}`}>
+              <div className={`mono text-xs font-semibold mb-1.5 ${isToday ? 'text-[#00d97e]' : color !== 'gray' ? 'text-[#9a9aaa]' : 'text-[#2a2a35]'}`}>
                 {format(day, 'd')}
               </div>
-              <div className="flex-1 space-y-1.5">
-                <TradeSlot
-                  trade={t1} label="T1"
-                  strategyName={t1 ? strategies.find(s => s.id === t1.strategyId)?.name ?? '—' : ''}
-                  onImageClick={src => t1 && openModal(src, t1)}
-                />
-                <TradeSlot
-                  trade={t2} label="T2"
-                  strategyName={t2 ? strategies.find(s => s.id === t2.strategyId)?.name ?? '—' : ''}
-                  onImageClick={src => t2 && openModal(src, t2)}
-                />
+              <div className="flex-1 space-y-1">
+                <Slot trade={t1} label="T1" strategyName={t1 ? strategies.find(s => s.id === t1.strategyId)?.name ?? '—' : ''} onOpen={src => t1 && setModal({ src, trade: t1 })} />
+                <Slot trade={t2} label="T2" strategyName={t2 ? strategies.find(s => s.id === t2.strategyId)?.name ?? '—' : ''} onOpen={src => t2 && setModal({ src, trade: t2 })} />
               </div>
             </div>
           )
@@ -110,56 +110,51 @@ export default function CalendarTab({ trades, strategies }: Props) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-5 text-sm text-gray-500">
-        {[
-          { color: 'bg-[#22c55e]/30', label: 'Parfait (WIN/WIN)' },
-          { color: 'bg-[#f59e0b]/30', label: 'Mitigé' },
-          { color: 'bg-[#ef4444]/30', label: 'Perdant' },
-          { color: 'bg-[#2a2a2a]', label: 'Vide' },
-        ].map(l => (
-          <div key={l.label} className="flex items-center gap-2">
-            <div className={`w-3.5 h-3.5 rounded ${l.color} border border-white/10`} />
-            {l.label}
+      <div className="flex items-center gap-5 mono text-xs text-[#2a2a35] tracking-wider">
+        {[['#00d97e', 'WIN/WIN'], ['#f59e0b', 'MITIGÉ'], ['#ff4d4d', 'LOSS/LOSS'], ['#1c1c24', 'VIDE']].map(([c, l]) => (
+          <div key={l} className="flex items-center gap-2">
+            <div className="w-2.5 h-2.5 rounded-sm border" style={{ borderColor: c, background: `${c}20` }} />
+            {l}
           </div>
         ))}
       </div>
 
       {/* Modal */}
       {modal && (
-        <div className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4" onClick={() => setModal(null)}>
+        <div className="fixed inset-0 bg-black/92 z-50 flex items-center justify-center p-4" onClick={() => setModal(null)}>
           <div className="relative max-w-4xl w-full" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-3 px-1">
-              <div className="text-sm text-gray-300">
-                <span className="font-semibold">{modal.trade.tradeNumber}</span>
-                {' · '}{modal.trade.date}
-                {' · '}<span className={modal.trade.direction === 'Long' ? 'text-[#22c55e]' : 'text-[#ef4444]'}>{modal.trade.direction}</span>
-                {' · '}{strategies.find(s => s.id === modal.trade.strategyId)?.name}
+            <div className="flex items-center justify-between mb-3">
+              <div className="mono text-xs text-[#4a4a58] tracking-wider flex items-center gap-2">
+                <span className="text-[#9a9aaa] font-semibold">{modal.trade.tradeNumber}</span>
+                <span className="text-[#1c1c24]">·</span>
+                <span>{modal.trade.date}</span>
+                <span className="text-[#1c1c24]">·</span>
+                <span className={modal.trade.direction === 'Long' ? 'text-[#00d97e]' : 'text-[#ff4d4d]'}>{modal.trade.direction.toUpperCase()}</span>
+                <span className="text-[#1c1c24]">·</span>
+                <span>{strategies.find(s => s.id === modal.trade.strategyId)?.name}</span>
                 {modal.trade.result && (
-                  <span className={`ml-2 font-bold ${modal.trade.result === 'WIN' ? 'text-[#22c55e]' : 'text-[#ef4444]'}`}>
+                  <span className={`font-bold ml-1 ${modal.trade.result === 'WIN' ? 'text-[#00d97e]' : 'text-[#ff4d4d]'}`}>
                     {modal.trade.result}
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                <button onClick={() => setZoom(z => Math.max(0.5, z - 0.25))}
-                  className="w-9 h-9 bg-[#2a2a2a] rounded-lg flex items-center justify-center text-gray-300 hover:bg-[#3a3a3a] cursor-pointer">
-                  <ZoomOut size={15} />
-                </button>
-                <span className="text-sm text-gray-400 w-12 text-center">{Math.round(zoom * 100)}%</span>
-                <button onClick={() => setZoom(z => Math.min(3, z + 0.25))}
-                  className="w-9 h-9 bg-[#2a2a2a] rounded-lg flex items-center justify-center text-gray-300 hover:bg-[#3a3a3a] cursor-pointer">
-                  <ZoomIn size={15} />
-                </button>
-                <button onClick={() => setModal(null)}
-                  className="w-9 h-9 bg-[#2a2a2a] rounded-lg flex items-center justify-center text-gray-300 hover:bg-[#3a3a3a] cursor-pointer">
-                  <X size={15} />
-                </button>
+              <div className="flex items-center gap-1.5">
+                {[
+                  { icon: ZoomOut, fn: () => setZoom(z => Math.max(0.5, z - 0.25)) },
+                  { icon: ZoomIn,  fn: () => setZoom(z => Math.min(3, z + 0.25)) },
+                  { icon: X,       fn: () => setModal(null) },
+                ].map(({ icon: Icon, fn }) => (
+                  <button key={fn.toString()} onClick={fn}
+                    className="w-8 h-8 bg-[#111116] border border-[#1c1c24] rounded flex items-center justify-center text-[#4a4a58] hover:text-white hover:border-[#2a2a35] cursor-pointer transition-colors">
+                    <Icon size={13} />
+                  </button>
+                ))}
               </div>
             </div>
-            <div className="overflow-auto max-h-[80vh] rounded-xl border border-[#3a3a3a]">
+            <div className="overflow-auto max-h-[80vh] rounded-lg border border-[#1c1c24]">
               <img src={modal.src} alt=""
                 style={{ transform: `scale(${zoom})`, transformOrigin: 'top left', width: `${100 / zoom}%` }}
-                className="block transition-transform" />
+                className="block" />
             </div>
           </div>
         </div>
@@ -168,41 +163,35 @@ export default function CalendarTab({ trades, strategies }: Props) {
   )
 }
 
-function TradeSlot({ trade, label, strategyName, onImageClick }: {
-  trade?: Trade
-  label: string
-  strategyName: string
-  onImageClick: (src: string) => void
+function Slot({ trade, label, strategyName, onOpen }: {
+  trade?: Trade; label: string; strategyName: string; onOpen: (src: string) => void
 }) {
-  if (!trade) {
-    return (
-      <div className="h-9 rounded border border-dashed border-[#2a2a2a] flex items-center justify-center">
-        <span className="text-xs text-gray-700">{label}</span>
-      </div>
-    )
-  }
+  if (!trade) return (
+    <div className="h-8 rounded border border-dashed border-[#1c1c24] flex items-center justify-center">
+      <span className="mono text-[10px] text-[#1c1c24] tracking-widest">{label}</span>
+    </div>
+  )
 
-  const resultColor = trade.result === 'WIN' ? 'text-[#22c55e]' : trade.result === 'LOSS' ? 'text-[#ef4444]' : 'text-gray-500'
-  const tooltipContent = `${label} · ${trade.direction} · ${strategyName} · ${trade.result ?? '?'}`
+  const rc = trade.result === 'WIN' ? 'text-[#00d97e]' : trade.result === 'LOSS' ? 'text-[#ff4d4d]' : 'text-[#3a3a48]'
+  const tt = `${label} · ${trade.direction} · ${strategyName} · ${trade.result ?? '?'}`
 
   return (
-    <div title={tooltipContent}
-      className="h-9 rounded border border-[#3a3a3a] overflow-hidden relative group cursor-pointer"
-      onClick={() => trade.referenceScreenshot && onImageClick(trade.referenceScreenshot)}>
+    <div title={tt} onClick={() => trade.referenceScreenshot && onOpen(trade.referenceScreenshot)}
+      className="h-8 rounded border border-[#1c1c24] overflow-hidden relative group cursor-pointer hover:border-[#2a2a35] transition-colors">
       {trade.referenceScreenshot ? (
         <>
-          <img src={trade.referenceScreenshot} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <img src={trade.referenceScreenshot} alt="" className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
         </>
       ) : (
-        <div className="w-full h-full bg-[#252525] flex items-center justify-center gap-1.5">
-          <span className="text-xs text-gray-500">{label}</span>
-          {trade.result && <span className={`text-xs font-bold ${resultColor}`}>{trade.result}</span>}
+        <div className="w-full h-full bg-[#0b0b0f] flex items-center justify-center gap-1.5">
+          <span className="mono text-[10px] text-[#2a2a35]">{label}</span>
+          {trade.result && <span className={`mono text-[10px] font-bold ${rc}`}>{trade.result}</span>}
         </div>
       )}
-      <div className="absolute bottom-0 left-0 right-0 flex justify-between px-1.5 py-0.5 bg-gradient-to-t from-black/70 to-transparent">
-        <span className="text-xs text-gray-300">{label}</span>
-        {trade.result && <span className={`text-xs font-bold ${resultColor}`}>{trade.result}</span>}
+      <div className="absolute bottom-0 left-0 right-0 flex justify-between items-center px-1.5 py-0.5 bg-gradient-to-t from-black/80">
+        <span className="mono text-[9px] text-[#9a9aaa]">{label}</span>
+        {trade.result && <span className={`mono text-[9px] font-bold ${rc}`}>{trade.result}</span>}
       </div>
     </div>
   )

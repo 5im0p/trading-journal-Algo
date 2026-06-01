@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Trade, Strategy } from '../types'
 import TradeForm from './TradeForm'
 import StrategyManager from './StrategyManager'
-import { Plus, Pencil, Trash2, Copy, TrendingUp, TrendingDown, Settings, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, Copy, TrendingUp, TrendingDown, Settings, X, Activity } from 'lucide-react'
 import { formatDate } from '../utils'
 
 interface Props {
@@ -19,95 +19,122 @@ export default function TradesTab({ trades, strategies, onUpdateTrades, onUpdate
   const [imageModal, setImageModal] = useState<string | null>(null)
 
   function handleSave(trade: Trade) {
-    if (editTrade) {
-      onUpdateTrades(trades.map(t => t.id === trade.id ? trade : t))
-    } else {
-      onUpdateTrades([...trades, trade])
-    }
+    onUpdateTrades(editTrade ? trades.map(t => t.id === trade.id ? trade : t) : [...trades, trade])
     setShowForm(false)
     setEditTrade(undefined)
   }
 
   function handleDelete(id: string) {
-    if (confirm('Supprimer ce trade ?')) {
-      onUpdateTrades(trades.filter(t => t.id !== id))
-    }
+    if (confirm('Supprimer ce trade ?')) onUpdateTrades(trades.filter(t => t.id !== id))
   }
 
   function handleDuplicate(trade: Trade) {
     const { id: _, createdAt: __, updatedAt: ___, ...rest } = trade
     const now = new Date().toISOString()
     const today = now.slice(0, 10)
-    const dayTrades = trades.filter(t => t.date === today)
-    const usedNumbers = dayTrades.map(t => t.tradeNumber)
-    const freeNumber = (['T1', 'T2'] as const).find(n => !usedNumbers.includes(n))
-    if (!freeNumber) { alert("Max 2 trades par jour déjà atteint pour aujourd'hui."); return }
-    onUpdateTrades([...trades, { ...rest, id: crypto.randomUUID(), date: today, tradeNumber: freeNumber, createdAt: now, updatedAt: now }])
-  }
-
-  function getStrategyName(id: string) {
-    return strategies.find(s => s.id === id)?.name ?? '—'
+    const used = trades.filter(t => t.date === today).map(t => t.tradeNumber)
+    const free = (['T1', 'T2'] as const).find(n => !used.includes(n))
+    if (!free) { alert("Max 2 trades par jour atteint."); return }
+    onUpdateTrades([...trades, { ...rest, id: crypto.randomUUID(), date: today, tradeNumber: free, createdAt: now, updatedAt: now }])
   }
 
   const sortedTrades = [...trades].sort((a, b) => b.date.localeCompare(a.date) || a.tradeNumber.localeCompare(b.tradeNumber))
+  const wins = trades.filter(t => t.result === 'WIN').length
+  const wr = trades.length > 0 ? ((wins / trades.filter(t => t.result).length) * 100) : 0
 
   return (
     <div className="space-y-6">
+
+      {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-white">Saisie des Trades</h2>
-          <p className="text-sm text-gray-500 mt-1">{trades.length} trade{trades.length !== 1 ? 's' : ''} enregistré{trades.length !== 1 ? 's' : ''}</p>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs text-[#3a3a48] mono tracking-widest uppercase">Journal</span>
+            <span className="text-[#1c1c24]">/</span>
+            <span className="text-xs text-[#00d97e] mono tracking-widest uppercase">Trades</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="mono text-2xl font-semibold text-white">{trades.length}</span>
+            <span className="text-[#3a3a48] text-sm">trades enregistrés</span>
+            {trades.filter(t => t.result).length > 0 && (
+              <span className={`mono text-sm font-semibold ${wr >= 50 ? 'text-[#00d97e]' : 'text-[#ff4d4d]'}`}>
+                {wr.toFixed(1)}% WR
+              </span>
+            )}
+          </div>
         </div>
-        <div className="flex gap-3">
-          <button onClick={() => setShowStrategyManager(!showStrategyManager)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors cursor-pointer ${showStrategyManager ? 'bg-[#2a2a2a] border-[#444] text-white' : 'border-[#3a3a3a] text-gray-400 hover:text-white hover:bg-[#2a2a2a]'}`}>
-            <Settings size={15} /> Stratégies
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowStrategyManager(!showStrategyManager)}
+            className={`flex items-center gap-2 px-4 py-2 rounded border text-xs font-semibold tracking-wider uppercase transition-colors cursor-pointer ${
+              showStrategyManager
+                ? 'bg-[#1c1c24] border-[#2a2a35] text-white'
+                : 'border-[#1c1c24] text-[#4a4a58] hover:text-[#9a9aaa] hover:border-[#2a2a35]'
+            }`}>
+            <Settings size={13} /> Stratégies
           </button>
-          <button onClick={() => { setEditTrade(undefined); setShowForm(true) }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#22c55e] text-black text-sm font-semibold hover:bg-[#16a34a] transition-colors cursor-pointer">
-            <Plus size={15} /> Nouveau trade
+          <button
+            onClick={() => { setEditTrade(undefined); setShowForm(true) }}
+            className="flex items-center gap-2 px-4 py-2 rounded border border-[#00d97e]/40 bg-[#00d97e]/8 text-[#00d97e] text-xs font-semibold tracking-wider uppercase hover:bg-[#00d97e]/15 hover:border-[#00d97e]/60 transition-colors cursor-pointer">
+            <Plus size={13} /> Nouveau trade
           </button>
         </div>
       </div>
 
+      {/* Strategy Manager */}
       {showStrategyManager && (
-        <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-5">
+        <div className="bg-[#0f0f14] border border-[#1c1c24] rounded-xl p-5">
           <StrategyManager strategies={strategies} onUpdate={onUpdateStrategies} />
         </div>
       )}
 
+      {/* Trade Form */}
       {showForm && (
-        <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-6">
-          <h3 className="text-base font-semibold text-white mb-5">{editTrade ? 'Modifier le trade' : 'Nouveau trade'}</h3>
-          <TradeForm trades={trades} strategies={strategies} editTrade={editTrade}
-            onSave={handleSave} onCancel={() => { setShowForm(false); setEditTrade(undefined) }} />
+        <div className="bg-[#0f0f14] border border-[#1c1c24] rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <div className="w-1 h-4 bg-[#00d97e] rounded-full" />
+            <h3 className="text-sm font-semibold text-white tracking-wide">
+              {editTrade ? 'MODIFIER LE TRADE' : 'NOUVEAU TRADE'}
+            </h3>
+          </div>
+          <TradeForm
+            trades={trades} strategies={strategies} editTrade={editTrade}
+            onSave={handleSave}
+            onCancel={() => { setShowForm(false); setEditTrade(undefined) }}
+          />
         </div>
       )}
 
-      <div className="space-y-2">
-        {sortedTrades.length === 0 && (
-          <div className="text-center py-20 text-gray-500">
-            <TrendingUp size={40} className="mx-auto mb-4 opacity-30" />
-            <p className="text-base">Aucun trade enregistré.</p>
-            <p className="text-sm mt-1.5">Cliquez sur "Nouveau trade" pour commencer.</p>
+      {/* Trade list */}
+      <div className="space-y-1.5">
+        {sortedTrades.length === 0 ? (
+          <div className="text-center py-24 text-[#2a2a35]">
+            <Activity size={36} className="mx-auto mb-4 opacity-40" />
+            <p className="mono text-sm tracking-widest">NO TRADES LOADED</p>
+            <p className="text-xs mt-2 text-[#2a2a35]">Appuyez sur NOUVEAU TRADE pour commencer</p>
           </div>
+        ) : (
+          sortedTrades.map(trade => (
+            <TradeRow
+              key={trade.id}
+              trade={trade}
+              strategyName={strategies.find(s => s.id === trade.strategyId)?.name ?? '—'}
+              onEdit={() => { setEditTrade(trade); setShowForm(true) }}
+              onDelete={() => handleDelete(trade.id)}
+              onDuplicate={() => handleDuplicate(trade)}
+              onImageClick={setImageModal}
+            />
+          ))
         )}
-        {sortedTrades.map(trade => (
-          <TradeRow key={trade.id} trade={trade} strategyName={getStrategyName(trade.strategyId)}
-            onEdit={() => { setEditTrade(trade); setShowForm(true) }}
-            onDelete={() => handleDelete(trade.id)}
-            onDuplicate={() => handleDuplicate(trade)}
-            onImageClick={setImageModal}
-          />
-        ))}
       </div>
 
+      {/* Image modal */}
       {imageModal && (
-        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setImageModal(null)}>
-          <button className="absolute top-4 right-4 text-white hover:text-gray-300 cursor-pointer" onClick={() => setImageModal(null)}>
-            <X size={28} />
+        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setImageModal(null)}>
+          <button className="absolute top-4 right-4 text-[#4a4a58] hover:text-white cursor-pointer transition-colors">
+            <X size={22} />
           </button>
-          <img src={imageModal} alt="" className="max-w-full max-h-full rounded-lg object-contain" onClick={e => e.stopPropagation()} />
+          <img src={imageModal} alt="" className="max-w-full max-h-full rounded-lg object-contain border border-[#1c1c24]" onClick={e => e.stopPropagation()} />
         </div>
       )}
     </div>
@@ -115,52 +142,71 @@ export default function TradesTab({ trades, strategies, onUpdateTrades, onUpdate
 }
 
 function TradeRow({ trade, strategyName, onEdit, onDelete, onDuplicate, onImageClick }: {
-  trade: Trade
-  strategyName: string
-  onEdit: () => void
-  onDelete: () => void
-  onDuplicate: () => void
-  onImageClick: (url: string) => void
+  trade: Trade; strategyName: string
+  onEdit: () => void; onDelete: () => void; onDuplicate: () => void; onImageClick: (url: string) => void
 }) {
-  const resultColor = trade.result === 'WIN'
-    ? 'text-[#22c55e] bg-[#22c55e]/10 border-[#22c55e]/30'
-    : trade.result === 'LOSS'
-      ? 'text-[#ef4444] bg-[#ef4444]/10 border-[#ef4444]/30'
-      : 'text-gray-400 bg-[#2a2a2a] border-[#3a3a3a]'
+  const isWin  = trade.result === 'WIN'
+  const isLoss = trade.result === 'LOSS'
+  const accentColor = isWin ? '#00d97e' : isLoss ? '#ff4d4d' : '#2a2a35'
 
   return (
-    <div className="flex items-center gap-4 bg-[#2a2a2a] border border-[#3a3a3a] rounded-xl px-5 py-3.5 hover:border-[#444] transition-colors">
-      <div className="flex items-center gap-4 min-w-0 flex-1">
-        <span className="text-sm font-bold text-gray-400 w-7 shrink-0">{trade.tradeNumber}</span>
-        <div className="text-sm text-gray-400 shrink-0 hidden sm:block">
-          {formatDate(trade.date)}
-          {trade.time && <span className="ml-1.5 text-gray-600">{trade.time}</span>}
-        </div>
-        <span className={`inline-flex items-center gap-1.5 text-sm px-2.5 py-1 rounded-full ${trade.direction === 'Long' ? 'text-[#22c55e] bg-[#22c55e]/10' : 'text-[#ef4444] bg-[#ef4444]/10'}`}>
-          {trade.direction === 'Long' ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-          {trade.direction}
-        </span>
-        <span className="text-sm text-gray-300 bg-[#1e1e1e] border border-[#3a3a3a] px-2.5 py-1 rounded-full truncate max-w-32 hidden md:block">
-          {strategyName}
-        </span>
-        <span className={`text-sm font-bold px-2.5 py-1 rounded-full border ${resultColor}`}>
-          {trade.result ?? '—'}
-        </span>
+    <div
+      className="group flex items-center gap-4 bg-[#0f0f14] border border-[#1c1c24] rounded-lg px-4 py-3 hover:border-[#2a2a35] hover:bg-[#111118] transition-all"
+      style={{ borderLeft: `3px solid ${accentColor}` }}
+    >
+      {/* Trade number */}
+      <span className="mono text-xs font-semibold text-[#3a3a48] w-6 shrink-0">{trade.tradeNumber}</span>
+
+      {/* Date */}
+      <span className="mono text-xs text-[#4a4a58] shrink-0 hidden sm:block w-28">{formatDate(trade.date)}</span>
+
+      {/* Time */}
+      {trade.time && <span className="mono text-xs text-[#3a3a48] shrink-0 hidden md:block">{trade.time}</span>}
+
+      {/* Direction badge */}
+      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded border ${
+        trade.direction === 'Long'
+          ? 'text-[#00d97e] bg-[#00d97e]/6 border-[#00d97e]/20'
+          : 'text-[#ff4d4d] bg-[#ff4d4d]/6 border-[#ff4d4d]/20'
+      }`}>
+        {trade.direction === 'Long' ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+        {trade.direction.toUpperCase()}
+      </span>
+
+      {/* Strategy */}
+      <span className="text-xs text-[#4a4a58] bg-[#0b0b0f] border border-[#1c1c24] px-2.5 py-1 rounded truncate max-w-36 hidden md:block">
+        {strategyName}
+      </span>
+
+      {/* Result */}
+      <span className={`mono text-xs font-bold px-2.5 py-1 rounded border ${
+        isWin  ? 'text-[#00d97e] bg-[#00d97e]/8 border-[#00d97e]/25' :
+        isLoss ? 'text-[#ff4d4d] bg-[#ff4d4d]/8 border-[#ff4d4d]/25' :
+                 'text-[#3a3a48] bg-[#0b0b0f] border-[#1c1c24]'
+      }`}>
+        {trade.result ?? '—'}
+      </span>
+
+      {/* Screenshots */}
+      <div className="flex items-center gap-2 ml-auto shrink-0">
+        {[trade.referenceScreenshot, trade.entryScreenshot].filter(Boolean).map((src, i) => (
+          <img key={i} src={src!} alt="" onClick={() => onImageClick(src!)}
+            className="w-14 h-9 object-cover rounded border border-[#1c1c24] cursor-pointer hover:border-[#2a2a35] transition-colors opacity-70 hover:opacity-100" />
+        ))}
       </div>
-      <div className="flex items-center gap-2.5 shrink-0">
-        {trade.referenceScreenshot && (
-          <img src={trade.referenceScreenshot} alt=""
-            onClick={() => onImageClick(trade.referenceScreenshot!)}
-            className="w-14 h-9 object-cover rounded border border-[#3a3a3a] cursor-pointer hover:border-[#555]" />
-        )}
-        {trade.entryScreenshot && (
-          <img src={trade.entryScreenshot} alt=""
-            onClick={() => onImageClick(trade.entryScreenshot!)}
-            className="w-14 h-9 object-cover rounded border border-[#3a3a3a] cursor-pointer hover:border-[#555]" />
-        )}
-        <button onClick={onDuplicate} title="Dupliquer" className="text-gray-500 hover:text-gray-300 transition-colors p-1.5 cursor-pointer"><Copy size={15} /></button>
-        <button onClick={onEdit} title="Modifier" className="text-gray-500 hover:text-white transition-colors p-1.5 cursor-pointer"><Pencil size={15} /></button>
-        <button onClick={onDelete} title="Supprimer" className="text-gray-500 hover:text-red-400 transition-colors p-1.5 cursor-pointer"><Trash2 size={15} /></button>
+
+      {/* Actions — visibles au hover */}
+      <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        {[
+          { icon: Copy,    fn: onDuplicate, hover: 'hover:text-[#9a9aaa]' },
+          { icon: Pencil,  fn: onEdit,      hover: 'hover:text-white'     },
+          { icon: Trash2,  fn: onDelete,    hover: 'hover:text-[#ff4d4d]' },
+        ].map(({ icon: Icon, fn, hover }) => (
+          <button key={hover} onClick={fn}
+            className={`p-1.5 text-[#2a2a35] ${hover} transition-colors cursor-pointer`}>
+            <Icon size={13} />
+          </button>
+        ))}
       </div>
     </div>
   )

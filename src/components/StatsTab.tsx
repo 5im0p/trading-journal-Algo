@@ -38,7 +38,6 @@ export default function StatsTab({ trades, strategies }: Props) {
   const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '—'
   const { maxWin, maxLoss } = calcMaxStreak(filtered)
 
-  // Strategy breakdown
   const strategyStats = strategies.map(s => {
     const st = filtered.filter(t => t.strategyId === s.id)
     const sw = st.filter(t => t.result === 'WIN').length
@@ -46,7 +45,6 @@ export default function StatsTab({ trades, strategies }: Props) {
     return { ...s, total: st.length, wins: sw, losses: sl, wr: st.length > 0 ? ((sw / st.length) * 100).toFixed(0) : '—' }
   }).filter(s => s.total > 0)
 
-  // Monthly data
   const years = [...new Set(trades.map(t => t.date.slice(0, 4)))].sort()
   const allDates = filtered.map(t => new Date(t.date))
   let monthlyData: { month: string; WIN: number; LOSS: number }[] = []
@@ -65,10 +63,8 @@ export default function StatsTab({ trades, strategies }: Props) {
     })
   }
 
-  // Pie data
   const pieData = strategyStats.map((s, i) => ({ name: s.name, value: s.total, color: COLORS[i % COLORS.length] }))
 
-  // Heatmap — last 12 months of days
   const heatmapDays = useMemo(() => {
     const result: { date: string; color: 'gray' | 'green' | 'orange' | 'red' | 'empty' }[] = []
     const now = new Date()
@@ -82,14 +78,14 @@ export default function StatsTab({ trades, strategies }: Props) {
     return result
   }, [filtered])
 
-  const selectClass = "bg-[#1e1e1e] border border-[#3a3a3a] rounded-lg px-3 py-1.5 text-sm text-gray-300 focus:outline-none focus:border-[#22c55e]"
+  const selectClass = "bg-[#1e1e1e] border border-[#3a3a3a] rounded-lg px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-[#22c55e]"
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-white">Statistiques & Analytics</h2>
-          <p className="text-xs text-gray-500 mt-0.5">{totalTrades} trade{totalTrades !== 1 ? 's' : ''} dans la sélection</p>
+          <h2 className="text-xl font-semibold text-white">Statistiques & Analytics</h2>
+          <p className="text-sm text-gray-500 mt-1">{totalTrades} trade{totalTrades !== 1 ? 's' : ''} dans la sélection</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <select value={filterStrategy} onChange={e => setFilterStrategy(e.target.value)} className={selectClass}>
@@ -114,29 +110,29 @@ export default function StatsTab({ trades, strategies }: Props) {
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <KpiCard label="Total trades" value={totalTrades} Icon={Activity} color="text-gray-300" />
         <KpiCard label="WIN" value={wins} Icon={TrendingUp} color="text-[#22c55e]" />
         <KpiCard label="LOSS" value={losses} Icon={TrendingDown} color="text-[#ef4444]" />
-        <KpiCard label="Win Rate" value={winRate === '—' ? '—' : `${winRate}%`} Icon={Target} color={parseFloat(winRate as string) >= 50 ? 'text-[#22c55e]' : 'text-[#ef4444]'} />
+        <KpiCard label="Win Rate" value={winRate === '—' ? '—' : `${winRate}%`} Icon={Target}
+          color={parseFloat(winRate as string) >= 50 ? 'text-[#22c55e]' : 'text-[#ef4444]'} />
         <KpiCard label="Série max gains" value={maxWin} Icon={Award} color="text-[#22c55e]" />
         <KpiCard label="Série max pertes" value={maxLoss} Icon={AlertTriangle} color="text-[#ef4444]" />
       </div>
 
-      {/* Charts row */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Monthly bar chart */}
-        <div className="lg:col-span-2 bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-4">
-          <h3 className="text-sm font-semibold text-white mb-4">Évolution mensuelle</h3>
+        <div className="lg:col-span-2 bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-5">
+          <h3 className="text-base font-semibold text-white mb-5">Évolution mensuelle</h3>
           {monthlyData.length === 0 ? (
-            <div className="h-40 flex items-center justify-center text-gray-600 text-sm">Aucune donnée</div>
+            <div className="h-48 flex items-center justify-center text-gray-600 text-sm">Aucune donnée</div>
           ) : (
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={220}>
               <BarChart data={monthlyData} barCategoryGap="30%">
-                <XAxis dataKey="month" tick={{ fill: '#888', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis allowDecimals={false} tick={{ fill: '#888', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ background: '#1e1e1e', border: '1px solid #3a3a3a', borderRadius: 8, fontSize: 12 }} cursor={{ fill: '#ffffff08' }} />
-                <Legend wrapperStyle={{ fontSize: 12, color: '#888' }} />
+                <XAxis dataKey="month" tick={{ fill: '#888', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} tick={{ fill: '#888', fontSize: 12 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ background: '#1e1e1e', border: '1px solid #3a3a3a', borderRadius: 8, fontSize: 13 }} cursor={{ fill: '#ffffff08' }} />
+                <Legend wrapperStyle={{ fontSize: 13, color: '#888' }} />
                 <Bar dataKey="WIN" fill="#22c55e" radius={[3, 3, 0, 0]} />
                 <Bar dataKey="LOSS" fill="#ef4444" radius={[3, 3, 0, 0]} />
               </BarChart>
@@ -144,25 +140,24 @@ export default function StatsTab({ trades, strategies }: Props) {
           )}
         </div>
 
-        {/* Pie chart */}
-        <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-4">
-          <h3 className="text-sm font-semibold text-white mb-4">Stratégies</h3>
+        <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-5">
+          <h3 className="text-base font-semibold text-white mb-5">Stratégies</h3>
           {pieData.length === 0 ? (
-            <div className="h-40 flex items-center justify-center text-gray-600 text-sm">Aucune donnée</div>
+            <div className="h-48 flex items-center justify-center text-gray-600 text-sm">Aucune donnée</div>
           ) : (
             <>
-              <ResponsiveContainer width="100%" height={160}>
+              <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
-                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} dataKey="value" paddingAngle={2}>
+                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" paddingAngle={2}>
                     {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: '#1e1e1e', border: '1px solid #3a3a3a', borderRadius: 8, fontSize: 12 }} />
+                  <Tooltip contentStyle={{ background: '#1e1e1e', border: '1px solid #3a3a3a', borderRadius: 8, fontSize: 13 }} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="space-y-1 mt-2">
+              <div className="space-y-2 mt-2">
                 {pieData.map(d => (
-                  <div key={d.name} className="flex items-center gap-2 text-xs">
-                    <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: d.color }} />
+                  <div key={d.name} className="flex items-center gap-2 text-sm">
+                    <div className="w-3 h-3 rounded-sm shrink-0" style={{ background: d.color }} />
                     <span className="text-gray-300 truncate flex-1">{d.name}</span>
                     <span className="text-gray-500">{d.value}</span>
                   </div>
@@ -176,19 +171,19 @@ export default function StatsTab({ trades, strategies }: Props) {
       {/* Strategy table */}
       {strategyStats.length > 0 && (
         <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] overflow-hidden">
-          <div className="px-4 py-3 border-b border-[#3a3a3a]">
-            <h3 className="text-sm font-semibold text-white">Analyse par stratégie</h3>
+          <div className="px-5 py-4 border-b border-[#3a3a3a]">
+            <h3 className="text-base font-semibold text-white">Analyse par stratégie</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="text-xs text-gray-500 border-b border-[#3a3a3a]">
-                  <th className="text-left px-4 py-2.5 font-medium">Stratégie</th>
-                  <th className="text-center px-4 py-2.5 font-medium">Trades</th>
-                  <th className="text-center px-4 py-2.5 font-medium text-[#22c55e]">WIN</th>
-                  <th className="text-center px-4 py-2.5 font-medium text-[#ef4444]">LOSS</th>
-                  <th className="text-center px-4 py-2.5 font-medium">Win Rate</th>
-                  <th className="px-4 py-2.5 w-32"></th>
+                <tr className="text-sm text-gray-500 border-b border-[#3a3a3a]">
+                  <th className="text-left px-5 py-3 font-medium">Stratégie</th>
+                  <th className="text-center px-5 py-3 font-medium">Trades</th>
+                  <th className="text-center px-5 py-3 font-medium text-[#22c55e]">WIN</th>
+                  <th className="text-center px-5 py-3 font-medium text-[#ef4444]">LOSS</th>
+                  <th className="text-center px-5 py-3 font-medium">Win Rate</th>
+                  <th className="px-5 py-3 w-36"></th>
                 </tr>
               </thead>
               <tbody>
@@ -197,15 +192,17 @@ export default function StatsTab({ trades, strategies }: Props) {
                   const barColor = wr >= 60 ? '#22c55e' : wr >= 40 ? '#f59e0b' : '#ef4444'
                   return (
                     <tr key={s.id} className={`text-sm ${i < strategyStats.length - 1 ? 'border-b border-[#2e2e2e]' : ''}`}>
-                      <td className="px-4 py-3 text-gray-200 font-medium">{s.name}</td>
-                      <td className="px-4 py-3 text-center text-gray-300">{s.total}</td>
-                      <td className="px-4 py-3 text-center text-[#22c55e] font-semibold">{s.wins}</td>
-                      <td className="px-4 py-3 text-center text-[#ef4444] font-semibold">{s.losses}</td>
-                      <td className="px-4 py-3 text-center font-bold" style={{ color: barColor }}>{s.wr}{s.wr !== '—' ? '%' : ''}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-5 py-3.5 text-gray-200 font-medium">{s.name}</td>
+                      <td className="px-5 py-3.5 text-center text-gray-300">{s.total}</td>
+                      <td className="px-5 py-3.5 text-center text-[#22c55e] font-semibold">{s.wins}</td>
+                      <td className="px-5 py-3.5 text-center text-[#ef4444] font-semibold">{s.losses}</td>
+                      <td className="px-5 py-3.5 text-center font-bold" style={{ color: barColor }}>
+                        {s.wr}{s.wr !== '—' ? '%' : ''}
+                      </td>
+                      <td className="px-5 py-3.5">
                         {s.wr !== '—' && (
-                          <div className="h-1.5 bg-[#1e1e1e] rounded-full overflow-hidden">
-                            <div className="h-full rounded-full transition-all" style={{ width: `${s.wr}%`, background: barColor }} />
+                          <div className="h-2 bg-[#1e1e1e] rounded-full overflow-hidden">
+                            <div className="h-full rounded-full" style={{ width: `${s.wr}%`, background: barColor }} />
                           </div>
                         )}
                       </td>
@@ -219,10 +216,10 @@ export default function StatsTab({ trades, strategies }: Props) {
       )}
 
       {/* Heatmap */}
-      <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-4">
-        <h3 className="text-sm font-semibold text-white mb-4">Heatmap des 365 derniers jours</h3>
+      <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-5">
+        <h3 className="text-base font-semibold text-white mb-5">Heatmap des 365 derniers jours</h3>
         <div className="overflow-x-auto">
-          <div className="flex gap-0.5 flex-wrap" style={{ display: 'grid', gridTemplateColumns: 'repeat(52, 1fr)', gap: '2px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(52, 1fr)', gap: '3px' }}>
             {heatmapDays.map(({ date, color }) => {
               const bg = color === 'green' ? '#22c55e' : color === 'orange' ? '#f59e0b' : color === 'red' ? '#ef4444' : color === 'gray' ? '#3a3a3a' : '#222'
               return (
@@ -232,10 +229,10 @@ export default function StatsTab({ trades, strategies }: Props) {
             })}
           </div>
         </div>
-        <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">
+        <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
           {[['#22c55e', 'WIN'], ['#f59e0b', 'Mitigé'], ['#ef4444', 'LOSS'], ['#3a3a3a', 'Aucun résultat']].map(([bg, label]) => (
-            <div key={label} className="flex items-center gap-1">
-              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: bg }} />
+            <div key={label} className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm" style={{ background: bg }} />
               {label}
             </div>
           ))}
@@ -247,12 +244,12 @@ export default function StatsTab({ trades, strategies }: Props) {
 
 function KpiCard({ label, value, Icon, color }: { label: string; value: number | string; Icon: typeof Activity; color: string }) {
   return (
-    <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-gray-500">{label}</span>
-        <Icon size={14} className={color} />
+    <div className="bg-[#2a2a2a] rounded-xl border border-[#3a3a3a] p-5">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-sm text-gray-500">{label}</span>
+        <Icon size={15} className={color} />
       </div>
-      <div className={`text-2xl font-bold ${color}`}>{value}</div>
+      <div className={`text-3xl font-bold ${color}`}>{value}</div>
     </div>
   )
 }

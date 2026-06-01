@@ -37,24 +37,24 @@ export default function StrategyManager({ strategies, onUpdate }: Props) {
   }
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-white">Gestion des stratégies</h3>
-      <div className="space-y-1.5">
+    <div className="space-y-4">
+      <h3 className="text-base font-semibold text-white">Gestion des stratégies</h3>
+      <div className="space-y-2">
         {strategies.map(s => (
-          <div key={s.id} className="flex items-center gap-2 bg-[#1e1e1e] rounded-lg px-3 py-2 border border-[#3a3a3a]">
+          <div key={s.id} className="flex items-center gap-3 bg-[#1e1e1e] rounded-lg px-4 py-2.5 border border-[#3a3a3a]">
             {editId === s.id ? (
               <>
                 <input value={editName} onChange={e => setEditName(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditId(null) }}
                   className="flex-1 bg-transparent text-sm text-white focus:outline-none" autoFocus />
-                <button onClick={saveEdit} className="text-[#22c55e] hover:text-green-300 cursor-pointer"><Check size={14} /></button>
-                <button onClick={() => setEditId(null)} className="text-gray-500 hover:text-gray-300 cursor-pointer"><X size={14} /></button>
+                <button onClick={saveEdit} className="text-[#22c55e] hover:text-green-300 cursor-pointer p-0.5"><Check size={15} /></button>
+                <button onClick={() => setEditId(null)} className="text-gray-500 hover:text-gray-300 cursor-pointer p-0.5"><X size={15} /></button>
               </>
             ) : (
               <>
                 <span className="flex-1 text-sm text-gray-200">{s.name}</span>
-                <button onClick={() => startEdit(s)} className="text-gray-500 hover:text-gray-300 cursor-pointer"><Pencil size={13} /></button>
-                <button onClick={() => deleteStrategy(s.id)} className="text-gray-500 hover:text-red-400 cursor-pointer"><Trash2 size={13} /></button>
+                <button onClick={() => startEdit(s)} className="text-gray-500 hover:text-gray-300 cursor-pointer p-0.5"><Pencil size={14} /></button>
+                <button onClick={() => deleteStrategy(s.id)} className="text-gray-500 hover:text-red-400 cursor-pointer p-0.5"><Trash2 size={14} /></button>
               </>
             )}
           </div>
@@ -64,10 +64,10 @@ export default function StrategyManager({ strategies, onUpdate }: Props) {
         <input value={newName} onChange={e => setNewName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && addStrategy()}
           placeholder="Nouvelle stratégie..."
-          className="flex-1 bg-[#1e1e1e] border border-[#3a3a3a] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-[#22c55e] placeholder:text-gray-600" />
+          className="flex-1 bg-[#1e1e1e] border border-[#3a3a3a] rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#22c55e] placeholder:text-gray-600" />
         <button onClick={addStrategy}
-          className="px-3 py-2 bg-[#22c55e]/10 border border-[#22c55e]/30 rounded-lg text-[#22c55e] hover:bg-[#22c55e]/20 transition-colors cursor-pointer">
-          <Plus size={16} />
+          className="px-4 py-2.5 bg-[#22c55e]/10 border border-[#22c55e]/30 rounded-lg text-[#22c55e] hover:bg-[#22c55e]/20 transition-colors cursor-pointer">
+          <Plus size={17} />
         </button>
       </div>
     </div>

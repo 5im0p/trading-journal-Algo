@@ -73,13 +73,13 @@ export default function StatsTab({ trades, strategies }: Props) {
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs text-[#3a3a48] mono tracking-widest uppercase">Journal</span>
+            <span className="text-sm text-[#3a3a48] mono tracking-widest uppercase">Journal</span>
             <span className="text-[#1c1c24]">/</span>
-            <span className="text-xs text-[#00d97e] mono tracking-widest uppercase">Analytics</span>
+            <span className="text-sm text-[#00d97e] mono tracking-widest uppercase">Analytics</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="mono text-2xl font-semibold text-white">{total}</span>
-            <span className="text-[#3a3a48] text-sm">trades dans la sélection</span>
+          <div className="flex items-center gap-5">
+            <span className="mono text-4xl font-bold text-white">{total}</span>
+            <span className="text-[#3a3a48] text-base">trades dans la sélection</span>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -226,12 +226,12 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 function Kpi({ label, value, icon, color }: { label: string; value: number|string; icon: React.ReactNode; color: string }) {
   return (
-    <div className="bg-[#0f0f14] border border-[#1c1c24] rounded-xl p-4 hover:border-[#2a2a35] transition-colors">
-      <div className="flex items-center justify-between mb-3">
-        <span className="mono text-[10px] text-[#2a2a35] tracking-widest">{label}</span>
+    <div className="bg-[#0f0f14] border border-[#1c1c24] rounded-xl p-5 hover:border-[#2a2a35] transition-colors">
+      <div className="flex items-center justify-between mb-4">
+        <span className="mono text-xs text-[#2a2a35] tracking-widest">{label}</span>
         <span className={color}>{icon}</span>
       </div>
-      <div className={`mono text-2xl font-bold ${color}`}>{value}</div>
+      <div className={`mono text-4xl font-bold ${color}`}>{value}</div>
     </div>
   )
 }

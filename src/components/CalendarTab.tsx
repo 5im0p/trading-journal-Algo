@@ -29,15 +29,15 @@ export default function CalendarTab({ trades, strategies }: Props) {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs text-[#3a3a48] mono tracking-widest uppercase">Journal</span>
+            <span className="text-sm text-[#3a3a48] mono tracking-widest uppercase">Journal</span>
             <span className="text-[#1c1c24]">/</span>
-            <span className="text-xs text-[#00d97e] mono tracking-widest uppercase">Calendrier</span>
+            <span className="text-sm text-[#00d97e] mono tracking-widest uppercase">Calendrier</span>
           </div>
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-semibold text-white capitalize">
+          <div className="flex items-center gap-5">
+            <h2 className="text-3xl font-bold text-white capitalize">
               {format(current, 'MMMM yyyy', { locale: fr })}
             </h2>
-            <div className="flex items-center gap-3 text-sm">
+            <div className="flex items-center gap-3 text-base">
               <span className="mono text-[#00d97e] font-semibold">{monthWins}W</span>
               <span className="text-[#1c1c24]">/</span>
               <span className="mono text-[#ff4d4d] font-semibold">{monthLosses}L</span>
@@ -70,14 +70,14 @@ export default function CalendarTab({ trades, strategies }: Props) {
       </div>
 
       {/* Day headers */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-2">
         {DAY_NAMES.map(d => (
-          <div key={d} className="text-center mono text-xs text-[#2a2a35] tracking-widest py-2">{d}</div>
+          <div key={d} className="text-center mono text-sm text-[#2a2a35] tracking-widest py-2">{d}</div>
         ))}
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-2">
         {Array(firstDow).fill(null).map((_, i) => <div key={`p${i}`} />)}
         {days.map(day => {
           const dateStr = format(day, 'yyyy-MM-dd')
@@ -96,8 +96,8 @@ export default function CalendarTab({ trades, strategies }: Props) {
 
           return (
             <div key={dateStr}
-              className={`border rounded-lg p-1.5 min-h-[90px] flex flex-col transition-colors ${borderStyle} ${isToday ? 'ring-1 ring-[#2a2a35]' : ''}`}>
-              <div className={`mono text-xs font-semibold mb-1.5 ${isToday ? 'text-[#00d97e]' : color !== 'gray' ? 'text-[#9a9aaa]' : 'text-[#2a2a35]'}`}>
+              className={`border rounded-lg p-2.5 min-h-[110px] flex flex-col transition-colors ${borderStyle} ${isToday ? 'ring-1 ring-[#2a2a35]' : ''}`}>
+              <div className={`mono text-sm font-semibold mb-2 ${isToday ? 'text-[#00d97e]' : color !== 'gray' ? 'text-[#9a9aaa]' : 'text-[#2a2a35]'}`}>
                 {format(day, 'd')}
               </div>
               <div className="flex-1 space-y-1">
@@ -110,7 +110,7 @@ export default function CalendarTab({ trades, strategies }: Props) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-5 mono text-xs text-[#2a2a35] tracking-wider">
+      <div className="flex items-center gap-6 mono text-sm text-[#2a2a35] tracking-wider">
         {[['#00d97e', 'WIN/WIN'], ['#f59e0b', 'MITIGÉ'], ['#ff4d4d', 'LOSS/LOSS'], ['#1c1c24', 'VIDE']].map(([c, l]) => (
           <div key={l} className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-sm border" style={{ borderColor: c, background: `${c}20` }} />
@@ -167,8 +167,8 @@ function Slot({ trade, label, strategyName, onOpen }: {
   trade?: Trade; label: string; strategyName: string; onOpen: (src: string) => void
 }) {
   if (!trade) return (
-    <div className="h-8 rounded border border-dashed border-[#1c1c24] flex items-center justify-center">
-      <span className="mono text-[10px] text-[#1c1c24] tracking-widest">{label}</span>
+    <div className="h-10 rounded border border-dashed border-[#1c1c24] flex items-center justify-center">
+      <span className="mono text-xs text-[#1c1c24] tracking-widest">{label}</span>
     </div>
   )
 
@@ -177,7 +177,7 @@ function Slot({ trade, label, strategyName, onOpen }: {
 
   return (
     <div title={tt} onClick={() => trade.referenceScreenshot && onOpen(trade.referenceScreenshot)}
-      className="h-8 rounded border border-[#1c1c24] overflow-hidden relative group cursor-pointer hover:border-[#2a2a35] transition-colors">
+      className="h-10 rounded border border-[#1c1c24] overflow-hidden relative group cursor-pointer hover:border-[#2a2a35] transition-colors">
       {trade.referenceScreenshot ? (
         <>
           <img src={trade.referenceScreenshot} alt="" className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />

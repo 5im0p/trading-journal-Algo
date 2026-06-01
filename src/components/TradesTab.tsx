@@ -49,15 +49,15 @@ export default function TradesTab({ trades, strategies, onUpdateTrades, onUpdate
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs text-[#3a3a48] mono tracking-widest uppercase">Journal</span>
+            <span className="text-sm text-[#3a3a48] mono tracking-widest uppercase">Journal</span>
             <span className="text-[#1c1c24]">/</span>
-            <span className="text-xs text-[#00d97e] mono tracking-widest uppercase">Trades</span>
+            <span className="text-sm text-[#00d97e] mono tracking-widest uppercase">Trades</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="mono text-2xl font-semibold text-white">{trades.length}</span>
-            <span className="text-[#3a3a48] text-sm">trades enregistrés</span>
+          <div className="flex items-center gap-5">
+            <span className="mono text-4xl font-bold text-white">{trades.length}</span>
+            <span className="text-[#3a3a48] text-base">trades enregistrés</span>
             {trades.filter(t => t.result).length > 0 && (
-              <span className={`mono text-sm font-semibold ${wr >= 50 ? 'text-[#00d97e]' : 'text-[#ff4d4d]'}`}>
+              <span className={`mono text-xl font-bold ${wr >= 50 ? 'text-[#00d97e]' : 'text-[#ff4d4d]'}`}>
                 {wr.toFixed(1)}% WR
               </span>
             )}
@@ -106,7 +106,7 @@ export default function TradesTab({ trades, strategies, onUpdateTrades, onUpdate
       )}
 
       {/* Trade list */}
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         {sortedTrades.length === 0 ? (
           <div className="text-center py-24 text-[#2a2a35]">
             <Activity size={36} className="mx-auto mb-4 opacity-40" />
@@ -151,35 +151,35 @@ function TradeRow({ trade, strategyName, onEdit, onDelete, onDuplicate, onImageC
 
   return (
     <div
-      className="group flex items-center gap-4 bg-[#0f0f14] border border-[#1c1c24] rounded-lg px-4 py-3 hover:border-[#2a2a35] hover:bg-[#111118] transition-all"
+      className="group flex items-center gap-5 bg-[#0f0f14] border border-[#1c1c24] rounded-lg px-5 py-4 hover:border-[#2a2a35] hover:bg-[#111118] transition-all"
       style={{ borderLeft: `3px solid ${accentColor}` }}
     >
       {/* Trade number */}
-      <span className="mono text-xs font-semibold text-[#3a3a48] w-6 shrink-0">{trade.tradeNumber}</span>
+      <span className="mono text-sm font-bold text-[#3a3a48] w-8 shrink-0">{trade.tradeNumber}</span>
 
       {/* Date */}
-      <span className="mono text-xs text-[#4a4a58] shrink-0 hidden sm:block w-28">{formatDate(trade.date)}</span>
+      <span className="mono text-sm text-[#4a4a58] shrink-0 hidden sm:block w-32">{formatDate(trade.date)}</span>
 
       {/* Time */}
-      {trade.time && <span className="mono text-xs text-[#3a3a48] shrink-0 hidden md:block">{trade.time}</span>}
+      {trade.time && <span className="mono text-sm text-[#3a3a48] shrink-0 hidden md:block">{trade.time}</span>}
 
       {/* Direction badge */}
-      <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded border ${
+      <span className={`inline-flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded border ${
         trade.direction === 'Long'
           ? 'text-[#00d97e] bg-[#00d97e]/6 border-[#00d97e]/20'
           : 'text-[#ff4d4d] bg-[#ff4d4d]/6 border-[#ff4d4d]/20'
       }`}>
-        {trade.direction === 'Long' ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+        {trade.direction === 'Long' ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
         {trade.direction.toUpperCase()}
       </span>
 
       {/* Strategy */}
-      <span className="text-xs text-[#4a4a58] bg-[#0b0b0f] border border-[#1c1c24] px-2.5 py-1 rounded truncate max-w-36 hidden md:block">
+      <span className="text-sm text-[#4a4a58] bg-[#0b0b0f] border border-[#1c1c24] px-3 py-1.5 rounded truncate max-w-48 hidden md:block">
         {strategyName}
       </span>
 
       {/* Result */}
-      <span className={`mono text-xs font-bold px-2.5 py-1 rounded border ${
+      <span className={`mono text-sm font-bold px-3 py-1.5 rounded border ${
         isWin  ? 'text-[#00d97e] bg-[#00d97e]/8 border-[#00d97e]/25' :
         isLoss ? 'text-[#ff4d4d] bg-[#ff4d4d]/8 border-[#ff4d4d]/25' :
                  'text-[#3a3a48] bg-[#0b0b0f] border-[#1c1c24]'
@@ -191,20 +191,20 @@ function TradeRow({ trade, strategyName, onEdit, onDelete, onDuplicate, onImageC
       <div className="flex items-center gap-2 ml-auto shrink-0">
         {[trade.referenceScreenshot, trade.entryScreenshot].filter(Boolean).map((src, i) => (
           <img key={i} src={src!} alt="" onClick={() => onImageClick(src!)}
-            className="w-14 h-9 object-cover rounded border border-[#1c1c24] cursor-pointer hover:border-[#2a2a35] transition-colors opacity-70 hover:opacity-100" />
+            className="w-20 h-12 object-cover rounded border border-[#1c1c24] cursor-pointer hover:border-[#2a2a35] transition-colors opacity-70 hover:opacity-100" />
         ))}
       </div>
 
       {/* Actions — visibles au hover */}
-      <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
         {[
           { icon: Copy,    fn: onDuplicate, hover: 'hover:text-[#9a9aaa]' },
           { icon: Pencil,  fn: onEdit,      hover: 'hover:text-white'     },
           { icon: Trash2,  fn: onDelete,    hover: 'hover:text-[#ff4d4d]' },
         ].map(({ icon: Icon, fn, hover }) => (
           <button key={hover} onClick={fn}
-            className={`p-1.5 text-[#2a2a35] ${hover} transition-colors cursor-pointer`}>
-            <Icon size={13} />
+            className={`p-2 text-[#2a2a35] ${hover} transition-colors cursor-pointer`}>
+            <Icon size={15} />
           </button>
         ))}
       </div>
